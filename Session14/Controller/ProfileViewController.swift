@@ -6,43 +6,85 @@
 //
 
 import UIKit
+import Photos
 
 class ProfileViewController: UIViewController  {
     
-    
-    @IBOutlet weak var headerTableView: UITableView!
     @IBOutlet weak var postsCollectionView: UICollectionView!
     @IBOutlet weak var highlightsCollectionView: UICollectionView!
     @IBOutlet weak var buttonsCollectionView: UICollectionView!
     @IBOutlet weak var footerButtonsCollectionView: UICollectionView!
-    @IBOutlet weak var infoTableView: UITableView!
+    
+    @IBOutlet weak var topImage: UIImageView!
+    @IBOutlet weak var plusButton: UIButton!
+    @IBOutlet weak var editButton: UIButton!
+    @IBOutlet weak var addToolsButton: UIButton!
+    @IBOutlet weak var insightButton: UIButton!
+    @IBOutlet weak var emailButton: UIButton!
+    
+    var imagePicker: UIImagePickerController?
     
     
     var postArray: [Post] = []
     var highlistArray: [Heighlight] = []
     var buttonsArray: [Buttons] = []
     var footerBArray: [Footer] = []
-    var infoArray: [Info] = []
-    var headerArray: [Header] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
+        setupImagePicker()
         setUpcolletionView()
         creatPost()
         creatHighlight()
         createButtons()
         createFooter()
-        setUpTableView()
-        createInfo()
-        creatHeader()
+        setButtons()
+        setImage()
     }
     
-    func creatHeader() {
-        let header = Header(name: "metricool")
+    @IBAction func plusButtonPressed(_ sender: Any) {
+        if PHPhotoLibrary.authorizationStatus() == .authorized {
+            if let imagePic = imagePicker {
+                present(imagePic, animated: true)
+            }else {
+                let alert = UIAlertController(title: "No access!", message: "You have no access to the Photo Library", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default))
+                self.present(alert, animated: true, completion: nil)
+            }
+        }
+    }
+    
+    
+    func setImage() {
+        topImage.layer.cornerRadius = topImage.frame.width / 2
+        topImage.layer.borderWidth = 1
+        topImage.layer.borderColor = UIColor.lightGray.cgColor
+    }
+    
+    func setButtons() {
+        plusButton.layer.cornerRadius = plusButton.frame.width / 2
+        plusButton.layer.borderWidth = 1
+        plusButton.layer.borderColor = UIColor.black.cgColor
         
-        headerArray = [header]
-//        headerTableView.reloadData()
+        editButton.layer.cornerRadius = 5
+        editButton.layer.borderWidth = 1
+        editButton.layer.borderColor = UIColor.lightGray.cgColor
+        
+        addToolsButton.layer.cornerRadius = 5
+        addToolsButton.layer.borderWidth = 1
+        addToolsButton.layer.borderColor = UIColor.lightGray.cgColor
+        
+        insightButton.layer.cornerRadius = 5
+        insightButton.layer.borderWidth = 1
+        insightButton.layer.borderColor = UIColor.lightGray.cgColor
+        
+        emailButton.layer.cornerRadius = 5
+        emailButton.layer.borderWidth = 1
+        emailButton.layer.borderColor = UIColor.lightGray.cgColor
+        emailButton.layer.shadowRadius = 5
+        emailButton.layer.shadowOpacity = 0.5
+        emailButton.layer.shadowColor = UIColor.gray.cgColor
     }
     
     func creatPost() {
@@ -87,13 +129,6 @@ class ProfileViewController: UIViewController  {
         
         footerBArray = [fButton1, fButton2, fButton3, fButton4, fButton5]
         footerButtonsCollectionView.reloadData()
-    }
-    
-    func createInfo() {
-        let info1 = Info(id: 1, image: "infinity.circle", postNumberLabel: 810, postNameLabel: "Posts", followerNumberLabel: 23.1, followerNameLabel: "Followers", followingNumberLabel: 986, followingNameLabel: "Followig", titleLabel: "Metricoll ES ∞", firstLabel: "Analyze, manage and grow your digitak presence.", secondLabel: "ANALYSIS 📈 PLANING AN REPORTS 📄 ADS ﹩ 👇 Get", thirdLabel: "Started FREE Now.", linkLabel: "shqipi.com/metricool/265", seeLabel: "See original")
-
-        infoArray = [info1]
-        infoTableView.reloadData()
     }
 }
 
@@ -166,45 +201,26 @@ extension ProfileViewController: UICollectionViewDelegate, UICollectionViewDeleg
     }
 }
 
-//MARK: - UITableViewDelegate and UITableViewDataSource
-extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
+//MARK: - UIImagePickerControllerDelegate and UINavigationControllerDelegate
+extension ProfileViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
-    func setUpTableView(){
-        infoTableView.delegate = self
-        infoTableView.dataSource = self
-        infoTableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "InfoCell")
+    func setupImagePicker() {
+        imagePicker = UIImagePickerController()
+        imagePicker?.sourceType = .photoLibrary
+        imagePicker?.delegate = self
         
-//        headerTableView.delegate = self
-//        headerTableView.dataSource = self
-//        headerTableView.register(UINib(nibName: "HeaderCell", bundle: nil), forCellReuseIdentifier: "HeaderCell")
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if tableView == infoTableView {
-            return infoArray.count
-        }else {
-            return headerArray.count
+        PHPhotoLibrary.requestAuthorization { status in
+            print("Requst authorization status: \(status)")
         }
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if tableView == infoTableView {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "InfoCell") as! InfoCell
-            cell.setDetails(info: infoArray[indexPath.row])
-            return cell
-        }else {
-            let hcell = tableView.dequeueReusableCell(withIdentifier: "HeaderCell") as! HeaderCell
-            hcell.setDetailsNow(header: headerArray[indexPath.row])
-            return hcell
-        }
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        let selectedImage = info[UIImagePickerController.InfoKey.originalImage] as! UIImage
+        topImage.image = selectedImage
+        imagePicker?.dismiss(animated: true)
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if tableView == infoTableView {
-            return 330
-        }else {
-            return 31
-        }
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        imagePicker?.dismiss(animated: true)
     }
-    
 }

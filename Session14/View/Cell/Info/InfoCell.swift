@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import Photos
 
-class InfoCell: UITableViewCell {
+class InfoCell: UITableViewCell, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     @IBOutlet weak var topImage: UIImageView!
+    @IBOutlet weak var plusButton: UIButton!
     @IBOutlet weak var postsNumberLabel: UILabel!
     @IBOutlet weak var postsNameLabel: UILabel!
     @IBOutlet weak var followersNumberLabel: UILabel!
@@ -27,13 +29,36 @@ class InfoCell: UITableViewCell {
     @IBOutlet weak var insightsButton: UIButton!
     @IBOutlet weak var emailButton: UIButton!
     
+    var imagePicker: UIImagePickerController?
+    
 
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
         
+        setupImagePicker()
         setImage()
         setButtons()
+    }
+    
+    func setupImagePicker() {
+        imagePicker = UIImagePickerController()
+        imagePicker?.sourceType = .photoLibrary
+        imagePicker?.delegate = self
+        
+        PHPhotoLibrary.requestAuthorization { status in
+            print("Requst authorization status: \(status)")
+        }
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        let selectedImage = info[UIImagePickerController.InfoKey.originalImage] as! UIImage
+        topImage.image = selectedImage
+        imagePicker?.dismiss(animated: true)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        imagePicker?.dismiss(animated: true)
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -49,6 +74,10 @@ class InfoCell: UITableViewCell {
     }
     
     func setButtons() {
+        plusButton.layer.cornerRadius = plusButton.frame.width / 2
+        plusButton.layer.borderWidth = 1
+        plusButton.layer.borderColor = UIColor.black.cgColor
+        
         editButton.layer.cornerRadius = 5
         editButton.layer.borderWidth = 1
         editButton.layer.borderColor = UIColor.lightGray.cgColor
@@ -64,6 +93,9 @@ class InfoCell: UITableViewCell {
         emailButton.layer.cornerRadius = 5
         emailButton.layer.borderWidth = 1
         emailButton.layer.borderColor = UIColor.lightGray.cgColor
+        emailButton.layer.shadowRadius = 5
+        emailButton.layer.shadowOpacity = 0.5
+        emailButton.layer.shadowColor = UIColor.gray.cgColor
     }
     
     
@@ -81,4 +113,15 @@ class InfoCell: UITableViewCell {
         linkLabel.text = info.linkLabel
         seeLabel.text = info.seeLabel
     }
+    
+//    @IBAction func plusButtonPressed(_ sender: Any) {
+//        if PHPhotoLibrary.authorizationStatus() == .authorized {
+//            if let imagePic = imagePicker {
+//                present(imagePic, animated: true)
+//            }
+//        }
+//        
+//    }
+    
+    
 }
